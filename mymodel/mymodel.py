@@ -4,17 +4,9 @@ import numpy as np
 import time
 import gym
 
+from .tfjdrl import TFJDRL
 
-class GRUAgent:
-    """
-    とりあえずクラス名はGRUAgentにしてるけど、中間生成物を環境として与える
-    """
-    def __init__(self):
-        return 
-
-
-
-class DRL_Agent:
+class My_Agent:
     """Provides implementations for DRL algorithms
 
     Attributes
@@ -44,20 +36,32 @@ class DRL_Agent:
         start = time.time()
         account_memory = []
         actions_memory = []
-        for i in range(len(test_data.index.unique())):
-            action, _states = model.predict(test_obs)
-            test_obs, rewards, dones, info = test_env.step(action)
-            if i == (len(test_data.index.unique()) - 2):
-                account_memory = test_env.env_method(method_name="save_asset_memory")
-                actions_memory = test_env.env_method(method_name="save_action_memory")
+        model.eval()
+        with torch.no_grad():
+            for i in range(len(test_data.index.unique())):
+                action, _states = model(test_obs)
+                test_obs, rewards, dones, info = test_env.step(action)
+                if i == (len(test_data.index.unique()) - 2):
+                    account_memory = test_env.env_method(method_name="save_asset_memory")
+                    actions_memory = test_env.env_method(method_name="save_action_memory")
         end = time.time()
         return account_memory[0], actions_memory[0]
 
 
     def __init__(self, env):
         self.env = env
+        self.model = TFJDRL()
 
 
     def train_model(self, model, tb_log_name, total_timesteps=5000):
-        model = model.learn(total_timesteps=total_timesteps, tb_log_name=tb_log_name)
+        timesteps = 0
+
+        while timesteps < total_timesteps:
+            obs = self.env.reset()
+            done = False
+            while not done:
+
+
+            timesteps += 1
+        
         return model
